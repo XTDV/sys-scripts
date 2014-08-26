@@ -47,10 +47,13 @@ def read_args():
             if (i == "--help") or (i == "-h"):
                 print "This script is used to update DNS record for dynamic IP address."
                 print "Request arguments:"
-                print " --router or -r | router address"
-                print ""
+                print " --router  or -r | Router address"
+                print " --apikey  or -a | Cloud Flare API key"
+                print " --mail    or -m | Your resisted email address"
+                print " --zone    of -z | Your zone name"
                 print "Optional arguments:"
-                print " --force or -f  | force update address"
+                print " --force   or -f | force update address"
+                print " --verbose or -v |"
                 sys.exit(0)
             if (i == "--force") or (i == "-f"):
                 global arg_force
@@ -371,12 +374,6 @@ def if_id (if_name, if_list, if_next):
         
         index_count += 1
     
-            
-    #if if_id == len(if_list) - 1:
-    #    return 0
-    #else:
-    #    return if_id + 1
-    
 def is_number(val):
     """Check if argument is a number
  
@@ -399,7 +396,7 @@ def is_ip_diff(src_list, dst_list):
     1) Compare IP addresses to if_cached
     
     Returns:
-        True if diffirent
+        True if different
         False if both same
     """
     
