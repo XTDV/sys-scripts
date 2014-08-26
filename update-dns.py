@@ -95,8 +95,11 @@ def read_args():
                     print "Zone name is missing or incorrect"
                     sys.exit(2)
             
-            index_count += 1    
-        #print i
+            index_count += 1
+        if arg_verbose:
+            for i in sys.argv:
+                print " > %s" % (i)
+            
         return True
             
     except IndexError:
@@ -260,10 +263,13 @@ def clfare_index(zone, dns_list, if_list):
         cflare_results = json.loads(handler.read())
         
         # Index cflare_rec_id initial elements
-        for cf_index in cflare_results['response']['recs']['objs']:
-            cflare_rec_id[cf_index['rec_id']]['index'] = cf_index['rec_id']
-            cflare_rec_id[cf_index['rec_id']]['name'] = cf_index['name']
-            cflare_rec_id[cf_index['rec_id']]['address'] = cf_index['content']
+        try:
+            for cf_index in cflare_results['response']['recs']['objs']:
+                cflare_rec_id[cf_index['rec_id']]['index'] = cf_index['rec_id']
+                cflare_rec_id[cf_index['rec_id']]['name'] = cf_index['name']
+                cflare_rec_id[cf_index['rec_id']]['address'] = cf_index['content']
+        except KeyError:
+            return False
     else:
         if arg_verbose:
             print ' > bad request or error'
@@ -593,6 +599,7 @@ def main():
             print "OK - Indexed IP addresses for zone %s" % cflare_zone
         else:
             print "!! - Can not index IP addresses for zone %s" % cflare_zone
+            sys.exit(2)
         
         if write_ip(tmp_data_file):
             print "OK - Wrote IP addresses to %s" % tmp_data_file
