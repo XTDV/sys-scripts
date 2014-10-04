@@ -47,10 +47,13 @@ def read_args():
             if (i == "--help") or (i == "-h"):
                 print "This script is used to update DNS record for dynamic IP address."
                 print "Request arguments:"
-                print " --router or -r | router address"
-                print ""
+                print " --router  or -r | Router address"
+                print " --apikey  or -a | Cloud Flare API key"
+                print " --mail    or -m | Your resisted email address"
+                print " --zone    of -z | Your zone name"
                 print "Optional arguments:"
-                print " --force or -f  | force update address"
+                print " --force   or -f | force update address"
+                print " --verbose or -v |"
                 sys.exit(0)
             if (i == "--force") or (i == "-f"):
                 global arg_force
@@ -95,8 +98,11 @@ def read_args():
                     print "Zone name is missing or incorrect"
                     sys.exit(2)
             
-            index_count += 1    
-        #print i
+            index_count += 1
+        if arg_verbose:
+            for i in sys.argv:
+                print " > %s" % (i)
+            
         return True
             
     except IndexError:
@@ -260,10 +266,13 @@ def clfare_index(zone, dns_list, if_list):
         cflare_results = json.loads(handler.read())
         
         # Index cflare_rec_id initial elements
-        for cf_index in cflare_results['response']['recs']['objs']:
-            cflare_rec_id[cf_index['rec_id']]['index'] = cf_index['rec_id']
-            cflare_rec_id[cf_index['rec_id']]['name'] = cf_index['name']
-            cflare_rec_id[cf_index['rec_id']]['address'] = cf_index['content']
+        try:
+            for cf_index in cflare_results['response']['recs']['objs']:
+                cflare_rec_id[cf_index['rec_id']]['index'] = cf_index['rec_id']
+                cflare_rec_id[cf_index['rec_id']]['name'] = cf_index['name']
+                cflare_rec_id[cf_index['rec_id']]['address'] = cf_index['content']
+        except KeyError:
+            return False
     else:
         if arg_verbose:
             print ' > bad request or error'
@@ -365,12 +374,6 @@ def if_id (if_name, if_list, if_next):
         
         index_count += 1
     
-            
-    #if if_id == len(if_list) - 1:
-    #    return 0
-    #else:
-    #    return if_id + 1
-    
 def is_number(val):
     """Check if argument is a number
  
@@ -393,7 +396,7 @@ def is_ip_diff(src_list, dst_list):
     1) Compare IP addresses to if_cached
     
     Returns:
-        True if diffirent
+        True if different
         False if both same
     """
     
@@ -593,6 +596,7 @@ def main():
             print "OK - Indexed IP addresses for zone %s" % cflare_zone
         else:
             print "!! - Can not index IP addresses for zone %s" % cflare_zone
+            sys.exit(2)
         
         if write_ip(tmp_data_file):
             print "OK - Wrote IP addresses to %s" % tmp_data_file
